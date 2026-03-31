@@ -10,7 +10,7 @@
             background-color: #050117;
             color: #ffffff;
             text-align: center;
-            font-family: 'Garamond', serif;
+            font-family: 'Garamond', serif; 
             margin: 0;
             padding: 0;
             display: flex;
@@ -33,13 +33,37 @@
             filter: drop-shadow(0 0 20px rgba(160, 100, 255, 0.4)); 
             transition: filter 1s ease; 
         }
+        #disco-ball {
+            width: 150px; 
+            height: auto;
+            margin: 20px auto;
+            display: block;
+            filter: drop-shadow(0 0 20px rgba(160, 100, 255, 0.5));
+        }
         #countdown-timer {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-variant-numeric: tabular-nums; 
             font-size: 6rem;
             font-weight: bold;
             letter-spacing: 5px;
             text-transform: uppercase;
             text-shadow: 0 0 10px rgba(160, 100, 255, 0.8), 0 0 20px rgba(160, 100, 255, 0.4);
             margin-top: 30px;
+        }
+        #click-msg {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 1.2rem; 
+            color: #a064ff; 
+            display: none;
+            margin-top: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
         }
         #celebration-wrapper {
             display: none; 
@@ -55,33 +79,34 @@
         @media (max-width: 600px) {
             #countdown-timer { font-size: 3rem; letter-spacing: 2px; }
             #celebration-msg { font-size: 2rem; }
-            #click-msg { font-size: 1.2rem; }
+            #click-msg { font-size: 1rem; }
         }
     </style>
 </head>
 <body>
 
     <div class="content-container">
-        <img id="main-text-image" src="images/minabday" alt="Mina's Birthday Countdown">
+        <img id="main-text-image" src="minabday.jpeg" alt="Mina's Birthday Countdown">
+        
+        <img id="disco-ball" src="discoball.gif" alt="Spinning Disco Ball">
         
         <div id="timer-wrapper">
             <div id="countdown-timer">Loading...</div>
+            <div id="click-msg">(Click anywhere to allow audio)</div>
         </div>
 
         <div id="celebration-wrapper">
             <div id="celebration-msg">HAPPY 20th BIRTHDAY, MINA!</div>
-            <div id="click-msg" style="font-size: 1.5rem; color: #a064ff; display: none;">
-                (Click anywhere to turn on music)
-            </div>
         </div>
     </div>
 
     <audio id="birthday-song" src="images/countdown.mp3" preload="auto"></audio>
 
     <script>
-        // === 1. CONFIGURATION: PACIFIC TIME ZONE ===
-        // The -07:00 guarantees it locks to Pacific Daylight Time.
-        const targetDate = new Date('2026-04-04T00:00:00-07:00').getTime();
+        // Countdown Time
+        const targetDate = new Date('2026-03-31T15:00:00-05:00').getTime();
+
+        // ==========================================================
 
         const timerWrapper = document.getElementById('timer-wrapper');
         const countdownDisplay = document.getElementById('countdown-timer');
@@ -89,6 +114,9 @@
         const clickMsgDisplay = document.getElementById('click-msg');
         const musicPlayer = document.getElementById('birthday-song');
         const textImage = document.getElementById('main-text-image');
+
+        let musicStarted = false;
+        const preStartSeconds = 117; // 1 minute and 57 seconds
 
         function startConfettiRain() {
             const duration = 15 * 1000; 
@@ -119,35 +147,66 @@
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            countdownDisplay.innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+            // 1. UPDATE TIMER VISUALS
+            if (distance > 0) {
+                let timeString = "";
+                if (days > 0) timeString += days + "d ";
+                if (hours > 0 || days > 0) timeString += hours + "h ";
+                if (minutes > 0 || hours > 0 || days > 0) timeString += minutes + "m ";
+                timeString += seconds + "s ";
+                countdownDisplay.innerHTML = timeString;
+            }
 
-            if (distance < 0) {
-                clearInterval(countdownInterval); 
-
-                timerWrapper.style.display = 'none'; 
-                celebrationWrapper.style.display = 'block'; 
-                textImage.style.filter = "drop-shadow(0 0 40px rgba(160, 100, 255, 0.9))"; 
-
-                // === 2. MUSIC TIMESTAMP LOGIC ===
-                // Set the song to start at exactly 117 seconds (1:57)
-                musicPlayer.currentTime = 117; 
+            // 2. CHECK IF WE ARE IN THE 1:57 PRE-START WINDOW
+            if (distance <= (preStartSeconds * 1000) && distance > 0 && !musicStarted) {
+                musicStarted = true; // Prevents this from triggering repeatedly
+                
+                // Calculate exact play position in case the page loaded slightly late
+                const currentSongTime = preStartSeconds - (distance / 1000);
+                musicPlayer.currentTime = Math.max(0, currentSongTime);
 
                 musicPlayer.play().then(() => {
-                    console.log("Music playing at 1:57!");
+                    console.log("Music synced and playing!");
+                    clickMsgDisplay.style.display = 'none';
                 }).catch(error => {
-                    console.log("Autoplay blocked. Waiting for user interaction.");
-                    clickMsgDisplay.style.display = 'block';
+                    console.log("Browser blocked autoplay. Waiting for user interaction.");
+                    clickMsgDisplay.style.display = 'block'; // Ask user to click
                     
                     document.body.addEventListener('click', () => {
-                        musicPlayer.currentTime = 117; // Ensure it still starts at 1:57 after clicking
+                        // Recalculate exactly where the song should be based on when they finally clicked
+                        const newDistance = targetDate - new Date().getTime();
+                        if (newDistance > 0) {
+                            musicPlayer.currentTime = preStartSeconds - (newDistance / 1000);
+                        } else {
+                            musicPlayer.currentTime = preStartSeconds + (Math.abs(newDistance) / 1000);
+                        }
                         musicPlayer.play();
                         clickMsgDisplay.style.display = 'none'; 
                     }, { once: true });
                 });
+            }
+
+            // 3. ZERO HOUR: MIDNIGHT CELEBRATION
+            if (distance <= 0) {
+                clearInterval(countdownInterval); 
+
+                // Visual changes
+                timerWrapper.style.display = 'none'; 
+                celebrationWrapper.style.display = 'block'; 
+                textImage.style.filter = "drop-shadow(0 0 40px rgba(160, 100, 255, 0.9))"; 
+
+                // Fallback: If someone opens the page exactly at midnight, start the music at 1:57
+                if (!musicStarted) {
+                    musicStarted = true;
+                    musicPlayer.currentTime = preStartSeconds;
+                    musicPlayer.play().catch(e => {
+                        document.body.addEventListener('click', () => { musicPlayer.play(); }, { once: true });
+                    });
+                }
 
                 startConfettiRain();
             }
-        }, 1000); 
+        }, 100); // Running check every 1/10th of a second for tighter audio sync
     </script>
 </body>
 </html>
