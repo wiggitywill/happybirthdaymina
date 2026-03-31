@@ -8,7 +8,7 @@
     
     <style>
         body {
-            background-color: #050117; /* Deep dark background */
+            background-color: #050117; 
             color: #ffffff;
             text-align: center;
             font-family: 'Garamond', serif; 
@@ -19,11 +19,38 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow: hidden; /* Prevents scrolling when confetti falls */
+            overflow: hidden; 
         }
+
+        /* === NEW NAVIGATION MENU STYLES === */
+        #top-nav {
+            position: absolute; /* Pins menu to the top */
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 25px 0;
+            text-align: center;
+            z-index: 100; /* Keeps menu above everything else */
+            background: linear-gradient(to bottom, rgba(5, 1, 23, 0.9) 0%, rgba(5, 1, 23, 0) 100%); /* Subtle shadow fade */
+        }
+        .nav-link {
+            color: #ffffff;
+            text-decoration: none;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 1.1rem;
+            margin: 0 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #a064ff; /* Turns purple when hovered or active */
+        }
+        /* ================================== */
+
         .content-container {
             max-width: 90%;
-            z-index: 10; /* Keeps text above the confetti */
+            z-index: 10; 
         }
         #main-text-image {
             display: block;
@@ -31,7 +58,7 @@
             max-width: 800px; 
             width: 100%;
             height: auto;
-            filter: drop-shadow(0 0 20px rgba(160, 100, 255, 0.4)); /* Subtle purple glow */
+            filter: drop-shadow(0 0 20px rgba(160, 100, 255, 0.4)); 
             transition: filter 1s ease; 
         }
         #disco-ball {
@@ -42,8 +69,8 @@
             filter: drop-shadow(0 0 20px rgba(160, 100, 255, 0.5));
         }
         #countdown-timer {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Clean font for numbers */
-            font-variant-numeric: tabular-nums; /* Stops numbers from jittering left/right */
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
+            font-variant-numeric: tabular-nums; 
             font-size: 6rem;
             font-weight: bold;
             letter-spacing: 5px;
@@ -55,11 +82,11 @@
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             font-size: 1.2rem; 
             color: #a064ff; 
-            display: none; /* Hidden until the 1:57 mark */
+            display: none; 
             margin-top: 15px;
             text-transform: uppercase;
             letter-spacing: 2px;
-            animation: pulse 2s infinite; /* Makes the text gently fade in and out */
+            animation: pulse 2s infinite; 
         }
         @keyframes pulse {
             0% { opacity: 0.5; }
@@ -67,7 +94,7 @@
             100% { opacity: 0.5; }
         }
         #celebration-wrapper {
-            display: none; /* Hidden until the timer hits exactly 00:00:00 */
+            display: none; 
             margin-top: 20px;
         }
         #celebration-msg {
@@ -77,16 +104,20 @@
             text-transform: uppercase;
             letter-spacing: 3px;
         }
-        /* Makes everything shrink nicely on mobile phones */
         @media (max-width: 600px) {
             #countdown-timer { font-size: 3rem; letter-spacing: 2px; }
             #celebration-msg { font-size: 2rem; }
             #click-msg { font-size: 1rem; }
+            .nav-link { font-size: 0.9rem; margin: 0 10px; } /* Shrinks menu for mobile */
         }
     </style>
 </head>
 <body>
 
+    <header id="top-nav">
+        <a href="index.html" class="nav-link active">Home</a> 
+        <a href="message.html" class="nav-link">Message</a>
+    </header>
     <div class="content-container">
         <img id="main-text-image" src="images/minabday.jpeg" alt="Mina's Birthday Countdown">
         
@@ -105,10 +136,8 @@
     <audio id="birthday-song" src="images/countdown.mp3" preload="auto"></audio>
 
     <script>
-        // SET TARGET DATE: April 4, 2026 at Midnight. The "-05:00" locks it to Central Time.
-        const targetDate = new Date('2026-03-31T17:20:00-05:00').getTime();
+        const targetDate = new Date('2026-04-04T17:30:00-05:00').getTime();
 
-        // Connect the HTML elements above to variables so the code can control them
         const timerWrapper = document.getElementById('timer-wrapper');
         const countdownDisplay = document.getElementById('countdown-timer');
         const celebrationWrapper = document.getElementById('celebration-wrapper');
@@ -116,11 +145,9 @@
         const musicPlayer = document.getElementById('birthday-song');
         const textImage = document.getElementById('main-text-image');
 
-        // Audio variables
         let musicStarted = false;
-        const preStartSeconds = 117; // Tells the code exactly when to start the song (1m 57s)
+        const preStartSeconds = 117; 
 
-        // CONFETTI ENGINE: Custom function that shoots purple/white/silver confetti from the top for 15 seconds
         function startConfettiRain() {
             const duration = 15 * 1000; 
             const animationEnd = Date.now() + duration;
@@ -138,18 +165,15 @@
             }, 250);
         }
 
-        // MAIN LOOP: This chunk runs constantly, calculating the time and updating the screen
         const countdownInterval = setInterval(function() {
             const now = new Date().getTime();
             const distance = targetDate - now;
 
-            // Math to convert total milliseconds into days, hours, minutes, and seconds
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            // A. UPDATE TIMER VISUALS: Assembles the numbers and pushes them to the screen
             if (distance > 0) {
                 let timeString = "";
                 if (days > 0) timeString += days + "d ";
@@ -159,21 +183,17 @@
                 countdownDisplay.innerHTML = timeString;
             }
 
-            // B. AUDIO SYNC CHECK: If there is exactly 1:57 left, attempt to start the music
             if (distance <= (preStartSeconds * 1000) && distance > 0 && !musicStarted) {
                 musicStarted = true; 
                 
-                // Calculates exact play position in case the page loaded a few seconds late
                 const currentSongTime = preStartSeconds - (distance / 1000);
                 musicPlayer.currentTime = Math.max(0, currentSongTime);
 
                 musicPlayer.play().then(() => {
-                    clickMsgDisplay.style.display = 'none'; // Music worked, hide warning
+                    clickMsgDisplay.style.display = 'none'; 
                 }).catch(error => {
-                    // Browser blocked it! Show "Click to allow" message
                     clickMsgDisplay.style.display = 'block'; 
                     
-                    // If user clicks anywhere, calculate lost time, skip song forward, and play
                     document.body.addEventListener('click', () => {
                         const newDistance = targetDate - new Date().getTime();
                         if (newDistance > 0) {
@@ -187,16 +207,13 @@
                 });
             }
 
-            // C. ZERO HOUR (MIDNIGHT): What happens when the timer finishes
             if (distance <= 0) {
-                clearInterval(countdownInterval); // Stops the timer loop
+                clearInterval(countdownInterval); 
 
-                // Swaps the timer out for the birthday message and intensifies the purple glow
                 timerWrapper.style.display = 'none'; 
                 celebrationWrapper.style.display = 'block'; 
                 textImage.style.filter = "drop-shadow(0 0 40px rgba(160, 100, 255, 0.9))"; 
 
-                // Fallback: If someone opens the page exactly at midnight, play from the 1:57 mark anyway
                 if (!musicStarted) {
                     musicStarted = true;
                     musicPlayer.currentTime = preStartSeconds;
@@ -205,10 +222,9 @@
                     });
                 }
 
-                // Fire the confetti cannons!
                 startConfettiRain();
             }
-        }, 100); // Runs 10 times a second to ensure audio syncs perfectly
+        }, 100); 
     </script>
 </body>
 </html>
