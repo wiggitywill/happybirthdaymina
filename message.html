@@ -1,1 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message for Mina</title>
+    
+    <style>
+        /* 1. CLEAN LIGHT BACKGROUND STYLES */
+        body {
+            background-color: #fafafa; /* Elegant off-white/light gray */
+            color: #333333; /* Dark gray text for high readability */
+            font-family: 'Garamond', serif; 
+            margin: 0;
+            /* Extra padding at the top so the images don't hide under the menu */
+            padding: 120px 20px 50px 20px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
 
+        /* 2. NAVIGATION MENU (Updated for Light Theme) */
+        #top-nav {
+            position: absolute; 
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 25px 0;
+            text-align: center;
+            z-index: 100; 
+            /* Subtle white fade instead of dark fade */
+            background: linear-gradient(to bottom, rgba(250, 250, 250, 1) 0%, rgba(250, 250, 250, 0) 100%); 
+        }
+        .nav-link {
+            color: #555555; /* Medium-dark gray for the unselected link */
+            text-decoration: none;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 1.1rem;
+            margin: 0 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: color 0.3s ease;
+        }
+        /* Hover effect and the 'active' page indicator stay your signature purple */
+        .nav-link:hover, .nav-link.active {
+            color: #a064ff; 
+            font-weight: bold;
+        }
+
+        /* 3. PHOTO GALLERY GRID */
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Creates a 2x2 grid */
+            gap: 20px;
+            max-width: 700px;
+            width: 100%;
+            margin-bottom: 50px;
+        }
+        .gallery-img {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1 / 1; /* Forces all images into perfect squares */
+            object-fit: cover; /* Ensures images fill the square without stretching */
+            border-radius: 12px; /* Soft, clean rounded corners */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Soft, airy drop shadow */
+            
+            /* Animation Setup */
+            opacity: 0; 
+            transform: translateY(30px); /* Starts slightly lower */
+            animation: fadeUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; /* Smooth elegant fade */
+        }
+
+        /* 4. ANIMATION TIMINGS (Staggers the fade-ins) */
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .pic1 { animation-delay: 0.3s; } /* First image fades in at 0.3s */
+        .pic2 { animation-delay: 0.7s; } /* Second image fades in at 0.7s */
+        .pic3 { animation-delay: 1.1s; } /* Third image fades in at 1.1s */
+        .pic4 { animation-delay: 1.5s; } /* Fourth image fades in at 1.5s */
+
+        /* 5. THE MESSAGE SECTION */
+        .message-box {
+            max-width: 600px;
+            text-align: center;
+            font-size: 1.4rem;
+            line-height: 1.8;
+            color: #444444;
+            
+            /* Fades in last, after all the photos */
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation-delay: 2.2s; 
+        }
+        .message-box h1 {
+            font-size: 2.5rem;
+            color: #222222;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            .nav-link { font-size: 0.9rem; margin: 0 10px; }
+            .gallery-container { gap: 10px; } /* Tighter spacing on phones */
+            .message-box h1 { font-size: 2rem; }
+            .message-box { font-size: 1.2rem; padding: 0 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header id="top-nav">
+        <a href="index.html" class="nav-link">Home</a> 
+        <a href="message.html" class="nav-link active">Message</a>
+    </header>
+    <div class="gallery-container">
+        <img class="gallery-img pic1" src="[PASTE IMAGE 1 LINK HERE]" alt="Memory 1">
+        <img class="gallery-img pic2" src="[PASTE IMAGE 2 LINK HERE]" alt="Memory 2">
+        <img class="gallery-img pic3" src="[PASTE IMAGE 3 LINK HERE]" alt="Memory 3">
+        <img class="gallery-img pic4" src="[PASTE IMAGE 4 LINK HERE]" alt="Memory 4">
+    </div>
+    <div class="message-box">
+        <h1>Happy Birthday, Mina!</h1>
+        <p>
+            Write your personal heartfelt message right here. You can make it as long as you want, and the text will automatically wrap and stay perfectly centered on the screen. Because of the code, this message won't even appear on the screen until all four photos have finished fading into view, making for a beautiful surprise. 
+        </p>
+        <p>
+            <i>— Love, [Your Name]</i>
+        </p>
+    </div>
+    </body>
+</html>
