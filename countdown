@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mina's Birthday Countdown</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    body {
+      background-color: #050505; /* Dark background to match your image */
+      color: #ffffff;
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      margin-top: 10vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    img {
+      max-width: 80%;
+      height: auto;
+      margin-bottom: 30px;
+    }
+    #countdown {
+      font-size: 4rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <img src="YOUR_IMAGE_LINK_HERE.jpg" alt="Mina's Birthday Countdown">
+  
+  <div id="countdown">Loading timer...</div>
+
+  <script>
+    // 1. SET MINA'S BIRTHDAY HERE (Format: YYYY-MM-DDTHH:MM:SS)
+    const birthday = new Date('2026-05-15T00:00:00').getTime();
+
+    const timer = setInterval(function() {
+      const now = new Date().getTime();
+      const distance = birthday - now;
+
+      // Calculate days, hours, minutes, and seconds
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      // Display the result
+      document.getElementById("countdown").innerHTML = 
+        days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+
+      // 2. WHAT HAPPENS WHEN THE COUNTDOWN ENDS
+      if (distance < 0) {
+        clearInterval(timer);
+        document.getElementById("countdown").innerHTML = "HAPPY BIRTHDAY MINA!";
+        
+        // Trigger the confetti cannons!
+        var duration = 15 * 1000;
+        var animationEnd = Date.now() + duration;
+        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+        function randomInRange(min, max) {
+          return Math.random() * (max - min) + min;
+        }
+
+        var interval = setInterval(function() {
+          var timeLeft = animationEnd - Date.now();
+
+          if (timeLeft <= 0) {
+            return clearInterval(interval);
+          }
+
+          var particleCount = 50 * (timeLeft / duration);
+          confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+          confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+        }, 250);
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
