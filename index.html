@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mina's Birthday Countdown</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
     <style>
         body {
-            background-color: #050117;
+            background-color: #050117; /* Deep dark background */
             color: #ffffff;
             text-align: center;
             font-family: 'Garamond', serif; 
@@ -18,11 +19,11 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow: hidden; 
+            overflow: hidden; /* Prevents scrolling when confetti falls */
         }
         .content-container {
             max-width: 90%;
-            z-index: 10; 
+            z-index: 10; /* Keeps text above the confetti */
         }
         #main-text-image {
             display: block;
@@ -30,7 +31,7 @@
             max-width: 800px; 
             width: 100%;
             height: auto;
-            filter: drop-shadow(0 0 20px rgba(160, 100, 255, 0.4)); 
+            filter: drop-shadow(0 0 20px rgba(160, 100, 255, 0.4)); /* Subtle purple glow */
             transition: filter 1s ease; 
         }
         #disco-ball {
@@ -41,8 +42,8 @@
             filter: drop-shadow(0 0 20px rgba(160, 100, 255, 0.5));
         }
         #countdown-timer {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            font-variant-numeric: tabular-nums; 
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Clean font for numbers */
+            font-variant-numeric: tabular-nums; /* Stops numbers from jittering left/right */
             font-size: 6rem;
             font-weight: bold;
             letter-spacing: 5px;
@@ -54,11 +55,11 @@
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             font-size: 1.2rem; 
             color: #a064ff; 
-            display: none;
+            display: none; /* Hidden until the 1:57 mark */
             margin-top: 15px;
             text-transform: uppercase;
             letter-spacing: 2px;
-            animation: pulse 2s infinite;
+            animation: pulse 2s infinite; /* Makes the text gently fade in and out */
         }
         @keyframes pulse {
             0% { opacity: 0.5; }
@@ -66,7 +67,7 @@
             100% { opacity: 0.5; }
         }
         #celebration-wrapper {
-            display: none; 
+            display: none; /* Hidden until the timer hits exactly 00:00:00 */
             margin-top: 20px;
         }
         #celebration-msg {
@@ -76,6 +77,7 @@
             text-transform: uppercase;
             letter-spacing: 3px;
         }
+        /* Makes everything shrink nicely on mobile phones */
         @media (max-width: 600px) {
             #countdown-timer { font-size: 3rem; letter-spacing: 2px; }
             #celebration-msg { font-size: 2rem; }
@@ -103,11 +105,10 @@
     <audio id="birthday-song" src="images/countdown.mp3" preload="auto"></audio>
 
     <script>
-        // Countdown Time
-        const targetDate = new Date('2026-03-31T15:015:00-05:00').getTime();
+        // SET TARGET DATE: April 4, 2026 at Midnight. The "-05:00" locks it to Central Time.
+        const targetDate = new Date('2026-03-31T15:18:00-05:00').getTime();
 
-        // ==========================================================
-
+        // Connect the HTML elements above to variables so the code can control them
         const timerWrapper = document.getElementById('timer-wrapper');
         const countdownDisplay = document.getElementById('countdown-timer');
         const celebrationWrapper = document.getElementById('celebration-wrapper');
@@ -115,39 +116,40 @@
         const musicPlayer = document.getElementById('birthday-song');
         const textImage = document.getElementById('main-text-image');
 
+        // Audio variables
         let musicStarted = false;
-        const preStartSeconds = 117; // 1 minute and 57 seconds
+        const preStartSeconds = 117; // Tells the code exactly when to start the song (1m 57s)
 
+        // CONFETTI ENGINE: Custom function that shoots purple/white/silver confetti from the top for 15 seconds
         function startConfettiRain() {
             const duration = 15 * 1000; 
             const animationEnd = Date.now() + duration;
             const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0, colors: ['#a064ff', '#ffffff', '#e6e6e6'] };
 
-            function randomInRange(min, max) {
-                return Math.random() * (max - min) + min;
-            }
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
 
             const interval = setInterval(function() {
                 const timeLeft = animationEnd - Date.now();
-                if (timeLeft <= 0) {
-                    return clearInterval(interval);
-                }
+                if (timeLeft <= 0) return clearInterval(interval);
+                
                 const particleCount = 120 * (timeLeft / duration);
                 confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.4), y: -0.1 } });
                 confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.6, 0.9), y: -0.1 } });
             }, 250);
         }
 
+        // MAIN LOOP: This chunk runs constantly, calculating the time and updating the screen
         const countdownInterval = setInterval(function() {
             const now = new Date().getTime();
             const distance = targetDate - now;
 
+            // Math to convert total milliseconds into days, hours, minutes, and seconds
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            // 1. UPDATE TIMER VISUALS
+            // A. UPDATE TIMER VISUALS: Assembles the numbers and pushes them to the screen
             if (distance > 0) {
                 let timeString = "";
                 if (days > 0) timeString += days + "d ";
@@ -157,23 +159,22 @@
                 countdownDisplay.innerHTML = timeString;
             }
 
-            // 2. CHECK IF WE ARE IN THE 1:57 PRE-START WINDOW
+            // B. AUDIO SYNC CHECK: If there is exactly 1:57 left, attempt to start the music
             if (distance <= (preStartSeconds * 1000) && distance > 0 && !musicStarted) {
-                musicStarted = true; // Prevents this from triggering repeatedly
+                musicStarted = true; 
                 
-                // Calculate exact play position in case the page loaded slightly late
+                // Calculates exact play position in case the page loaded a few seconds late
                 const currentSongTime = preStartSeconds - (distance / 1000);
                 musicPlayer.currentTime = Math.max(0, currentSongTime);
 
                 musicPlayer.play().then(() => {
-                    console.log("Music synced and playing!");
-                    clickMsgDisplay.style.display = 'none';
+                    clickMsgDisplay.style.display = 'none'; // Music worked, hide warning
                 }).catch(error => {
-                    console.log("Browser blocked autoplay. Waiting for user interaction.");
-                    clickMsgDisplay.style.display = 'block'; // Ask user to click
+                    // Browser blocked it! Show "Click to allow" message
+                    clickMsgDisplay.style.display = 'block'; 
                     
+                    // If user clicks anywhere, calculate lost time, skip song forward, and play
                     document.body.addEventListener('click', () => {
-                        // Recalculate exactly where the song should be based on when they finally clicked
                         const newDistance = targetDate - new Date().getTime();
                         if (newDistance > 0) {
                             musicPlayer.currentTime = preStartSeconds - (newDistance / 1000);
@@ -186,16 +187,16 @@
                 });
             }
 
-            // 3. ZERO HOUR: MIDNIGHT CELEBRATION
+            // C. ZERO HOUR (MIDNIGHT): What happens when the timer finishes
             if (distance <= 0) {
-                clearInterval(countdownInterval); 
+                clearInterval(countdownInterval); // Stops the timer loop
 
-                // Visual changes
+                // Swaps the timer out for the birthday message and intensifies the purple glow
                 timerWrapper.style.display = 'none'; 
                 celebrationWrapper.style.display = 'block'; 
                 textImage.style.filter = "drop-shadow(0 0 40px rgba(160, 100, 255, 0.9))"; 
 
-                // Fallback: If someone opens the page exactly at midnight, start the music at 1:57
+                // Fallback: If someone opens the page exactly at midnight, play from the 1:57 mark anyway
                 if (!musicStarted) {
                     musicStarted = true;
                     musicPlayer.currentTime = preStartSeconds;
@@ -204,9 +205,10 @@
                     });
                 }
 
+                // Fire the confetti cannons!
                 startConfettiRain();
             }
-        }, 100); // Running check every 1/10th of a second for tighter audio sync
+        }, 100); // Runs 10 times a second to ensure audio syncs perfectly
     </script>
 </body>
 </html>
