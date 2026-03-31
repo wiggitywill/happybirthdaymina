@@ -1,82 +1,153 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Mina's Birthday Countdown</title>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <style>
-    body {
-      background-color: #050505; /* Dark background to match your image */
-      color: #ffffff;
-      text-align: center;
-      font-family: 'Arial', sans-serif;
-      margin-top: 10vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    img {
-      max-width: 80%;
-      height: auto;
-      margin-bottom: 30px;
-    }
-    #countdown {
-      font-size: 4rem;
-      font-weight: bold;
-      letter-spacing: 2px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mina's Birthday Countdown</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            background-color: #050117;
+            color: #ffffff;
+            text-align: center;
+            font-family: 'Garamond', serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden; 
+        }
+        .content-container {
+            max-width: 90%;
+            z-index: 10; 
+        }
+        #main-text-image {
+            display: block;
+            margin: 0 auto;
+            max-width: 800px; 
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 0 20px rgba(160, 100, 255, 0.4)); 
+            transition: filter 1s ease; 
+        }
+        #countdown-timer {
+            font-size: 6rem;
+            font-weight: bold;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(160, 100, 255, 0.8), 0 0 20px rgba(160, 100, 255, 0.4);
+            margin-top: 30px;
+        }
+        #celebration-wrapper {
+            display: none; 
+            margin-top: 20px;
+        }
+        #celebration-msg {
+            font-size: 3.5rem;
+            color: #ffffff;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        @media (max-width: 600px) {
+            #countdown-timer { font-size: 3rem; letter-spacing: 2px; }
+            #celebration-msg { font-size: 2rem; }
+            #click-msg { font-size: 1.2rem; }
+        }
+    </style>
 </head>
 <body>
 
-  <img src="YOUR_IMAGE_LINK_HERE.jpg" alt="Mina's Birthday Countdown">
-  
-  <div id="countdown">Loading timer...</div>
-
-  <script>
-    // 1. SET MINA'S BIRTHDAY HERE (Format: YYYY-MM-DDTHH:MM:SS)
-    const birthday = new Date('2026-05-15T00:00:00').getTime();
-
-    const timer = setInterval(function() {
-      const now = new Date().getTime();
-      const distance = birthday - now;
-
-      // Calculate days, hours, minutes, and seconds
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-      // Display the result
-      document.getElementById("countdown").innerHTML = 
-        days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
-
-      // 2. WHAT HAPPENS WHEN THE COUNTDOWN ENDS
-      if (distance < 0) {
-        clearInterval(timer);
-        document.getElementById("countdown").innerHTML = "HAPPY BIRTHDAY MINA!";
+    <div class="content-container">
+        <img id="main-text-image" src="[PASTE DIRECT IMAGE LINK HERE]" alt="Mina's Birthday Countdown">
         
-        // Trigger the confetti cannons!
-        var duration = 15 * 1000;
-        var animationEnd = Date.now() + duration;
-        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+        <div id="timer-wrapper">
+            <div id="countdown-timer">Loading...</div>
+        </div>
 
-        function randomInRange(min, max) {
-          return Math.random() * (max - min) + min;
+        <div id="celebration-wrapper">
+            <div id="celebration-msg">HAPPY 20th BIRTHDAY, MINA!</div>
+            <div id="click-msg" style="font-size: 1.5rem; color: #a064ff; display: none;">
+                (Click anywhere to turn on music)
+            </div>
+        </div>
+    </div>
+
+    <audio id="birthday-song" src="[PASTE YOUR MUSIC LINK HERE]" preload="auto"></audio>
+
+    <script>
+        // === 1. CONFIGURATION: PACIFIC TIME ZONE ===
+        // The -07:00 guarantees it locks to Pacific Daylight Time.
+        const targetDate = new Date('2026-04-04T00:00:00-07:00').getTime();
+
+        const timerWrapper = document.getElementById('timer-wrapper');
+        const countdownDisplay = document.getElementById('countdown-timer');
+        const celebrationWrapper = document.getElementById('celebration-wrapper');
+        const clickMsgDisplay = document.getElementById('click-msg');
+        const musicPlayer = document.getElementById('birthday-song');
+        const textImage = document.getElementById('main-text-image');
+
+        function startConfettiRain() {
+            const duration = 15 * 1000; 
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0, colors: ['#a064ff', '#ffffff', '#e6e6e6'] };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+                const particleCount = 120 * (timeLeft / duration);
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.4), y: -0.1 } });
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.6, 0.9), y: -0.1 } });
+            }, 250);
         }
 
-        var interval = setInterval(function() {
-          var timeLeft = animationEnd - Date.now();
+        const countdownInterval = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
 
-          if (timeLeft <= 0) {
-            return clearInterval(interval);
-          }
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-          var particleCount = 50 * (timeLeft / duration);
-          confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
-          confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
-        }, 250);
-      }
-    }, 1000);
-  </script>
+            countdownDisplay.innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+
+            if (distance < 0) {
+                clearInterval(countdownInterval); 
+
+                timerWrapper.style.display = 'none'; 
+                celebrationWrapper.style.display = 'block'; 
+                textImage.style.filter = "drop-shadow(0 0 40px rgba(160, 100, 255, 0.9))"; 
+
+                // === 2. MUSIC TIMESTAMP LOGIC ===
+                // Set the song to start at exactly 117 seconds (1:57)
+                musicPlayer.currentTime = 117; 
+
+                musicPlayer.play().then(() => {
+                    console.log("Music playing at 1:57!");
+                }).catch(error => {
+                    console.log("Autoplay blocked. Waiting for user interaction.");
+                    clickMsgDisplay.style.display = 'block';
+                    
+                    document.body.addEventListener('click', () => {
+                        musicPlayer.currentTime = 117; // Ensure it still starts at 1:57 after clicking
+                        musicPlayer.play();
+                        clickMsgDisplay.style.display = 'none'; 
+                    }, { once: true });
+                });
+
+                startConfettiRain();
+            }
+        }, 1000); 
+    </script>
 </body>
 </html>
