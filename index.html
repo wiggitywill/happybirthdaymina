@@ -71,8 +71,8 @@
             font-size: 1.1rem;
             display: none; 
         }
-        /* =============================== */
 
+        /* === NAVIGATION MENU === */
         #top-nav {
             position: absolute; 
             top: 0;
@@ -116,11 +116,10 @@
             margin: 20px auto;
             display: block;
             filter: drop-shadow(0 0 20px rgba(160, 100, 255, 0.5));
-            /* NEW: Makes it clickable! */
             cursor: pointer; 
             transition: transform 0.2s ease;
         }
-        #disco-ball:active { transform: scale(0.9); } /* Squish effect when clicked */
+        #disco-ball:active { transform: scale(0.9); }
 
         #countdown-timer {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
@@ -174,6 +173,7 @@
         <button id="password-btn">Unlock</button>
         <div id="password-error">Incorrect password. Try again!</div>
     </div>
+
     <header id="top-nav">
         <a href="index.html" class="nav-link active">Home</a> 
         <a href="message.html" class="nav-link">Message</a>
@@ -194,16 +194,12 @@
     </div>
 
     <audio id="birthday-song" src="images/countdown.mp3" preload="auto"></audio>
-    
     <audio id="fart-sound" src="images/fart.mp3" preload="auto"></audio>
 
     <script>
-        // === 1. PASSWORD SETUP ===
         const correctPassword = "mina20"; 
-        
-        const targetDate = new Date('2026-04-02T20:51:00-05:00').getTime();
+        const targetDate = new Date('2026-04-04T00:00:00-05:00').getTime();
 
-        // ELEMENT REFERENCES
         const passwordOverlay = document.getElementById('password-overlay');
         const passwordInput = document.getElementById('password-input');
         const passwordBtn = document.getElementById('password-btn');
@@ -222,7 +218,7 @@
         let musicStarted = false;
         const preStartSeconds = 117; 
 
-        // === PASSWORD LOGIC ===
+        // === UPDATED PASSWORD LOGIC ===
         passwordBtn.addEventListener('click', checkPassword);
         passwordInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') checkPassword(); 
@@ -232,8 +228,10 @@
             const guess = passwordInput.value.toLowerCase().trim();
             if (guess === correctPassword) {
                 passwordOverlay.style.display = 'none';
-                // Entering the password counts as a "click" for browser audio rules!
-                musicPlayer.load(); 
+                
+                // AS SOON as the password is in, start the background music and loop it!
+                musicPlayer.loop = true;
+                musicPlayer.play().catch(e => console.log("Waiting for more interaction")); 
                 fartPlayer.load();
             } else {
                 passwordError.style.display = 'block';
@@ -242,91 +240,6 @@
         }
 
         // === EASTER EGG LOGIC ===
+        // The fart sound plays completely independently of the music track!
         discoBall.addEventListener('click', function() {
-            fartPlayer.currentTime = 0; // Rewinds so it works every time she clicks
-            fartPlayer.play();
-        });
-
-        // === CONFETTI ENGINE ===
-        function startConfettiRain() {
-            const duration = 15 * 1000; 
-            const animationEnd = Date.now() + duration;
-            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0, colors: ['#a064ff', '#ffffff', '#e6e6e6'] };
-
-            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-
-            const interval = setInterval(function() {
-                const timeLeft = animationEnd - Date.now();
-                if (timeLeft <= 0) return clearInterval(interval);
-                
-                const particleCount = 120 * (timeLeft / duration);
-                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.4), y: -0.1 } });
-                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.6, 0.9), y: -0.1 } });
-            }, 250);
-        }
-
-        // === MAIN TIMER LOOP ===
-        const countdownInterval = setInterval(function() {
-            const now = new Date().getTime();
-            const distance = targetDate - now;
-
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            if (distance > 0) {
-                let timeString = "";
-                if (days > 0) timeString += days + "d ";
-                if (hours > 0 || days > 0) timeString += hours + "h ";
-                if (minutes > 0 || hours > 0 || days > 0) timeString += minutes + "m ";
-                timeString += seconds + "s ";
-                countdownDisplay.innerHTML = timeString;
-            }
-
-            if (distance <= (preStartSeconds * 1000) && distance > 0 && !musicStarted) {
-                musicStarted = true; 
-                
-                const currentSongTime = preStartSeconds - (distance / 1000);
-                musicPlayer.currentTime = Math.max(0, currentSongTime);
-
-                musicPlayer.play().then(() => {
-                    clickMsgDisplay.style.display = 'none'; 
-                }).catch(error => {
-                    clickMsgDisplay.innerHTML = "(Click anywhere to allow audio)";
-                    clickMsgDisplay.style.display = 'block'; 
-                    
-                    document.body.addEventListener('click', () => {
-                        const newDistance = targetDate - new Date().getTime();
-                        if (newDistance > 0) {
-                            musicPlayer.currentTime = preStartSeconds - (newDistance / 1000);
-                        } else {
-                            musicPlayer.currentTime = preStartSeconds + (Math.abs(newDistance) / 1000);
-                        }
-                        musicPlayer.play();
-                        clickMsgDisplay.style.display = 'none'; 
-                    }, { once: true });
-                });
-            }
-
-            if (distance <= 0) {
-                clearInterval(countdownInterval); 
-
-                timerWrapper.style.display = 'none'; 
-                celebrationWrapper.style.display = 'block'; 
-                textImage.style.filter = "drop-shadow(0 0 40px rgba(160, 100, 255, 0.9))"; 
-
-                if (!musicStarted) {
-                    musicStarted = true;
-                    musicPlayer.currentTime = preStartSeconds;
-                    musicPlayer.play().catch(e => {
-                        document.body.addEventListener('click', () => { musicPlayer.play(); }, { once: true });
-                    });
-                }
-
-                startConfettiRain();
-            }
-        }, 100); 
-    </script>
-</body>
-</html>
+            fartPlayer.currentTime = 0;
