@@ -219,7 +219,7 @@
         let musicStarted = false;
         const preStartSeconds = 117; 
 
-        // === PASSWORD LOGIC ===
+        // === UPDATED PASSWORD LOGIC ===
         passwordBtn.addEventListener('click', checkPassword);
         passwordInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') checkPassword(); 
@@ -230,9 +230,21 @@
             if (guess === correctPassword) {
                 passwordOverlay.style.display = 'none';
                 
-                // We just "load" the audio here to satisfy the browser's rules, but we DON'T play it yet!
-                musicPlayer.load(); 
-                fartPlayer.load();
+                // === THE FIX ===
+                // Check if the timer is already finished right now
+                const now = new Date().getTime();
+                const distance = targetDate - now;
+
+                if (distance <= 0) {
+                    // The countdown is ALREADY over. Start the party music right now!
+                    musicPlayer.currentTime = preStartSeconds;
+                    musicPlayer.play();
+                    fartPlayer.load();
+                } else {
+                    // The countdown is still ticking. Just quiet-load the audio for later.
+                    musicPlayer.load(); 
+                    fartPlayer.load();
+                }
             } else {
                 passwordError.style.display = 'block';
                 passwordInput.value = ''; 
@@ -247,23 +259,20 @@
 
         // === UPGRADED CONFETTI ENGINE ===
         function startConfettiRain() {
-            // Failsafe: Stops after 10 minutes just in case the song ends up looping
             const failsafeEnd = Date.now() + (10 * 60 * 1000); 
             const defaults = { startVelocity: 40, spread: 360, ticks: 100, zIndex: 0, colors: ['#a064ff', '#ffffff', '#e6e6e6'] };
 
             function randomInRange(min, max) { return Math.random() * (max - min) + min; }
 
             const interval = setInterval(function() {
-                // STOPS the confetti if the MP3 track finishes playing or if the failsafe triggers
                 if (musicPlayer.ended || Date.now() > failsafeEnd) {
                     return clearInterval(interval);
                 }
                 
-                // MASSIVE CONFETTI STORM: Firing simultaneously from 3 different zones (left, center, right)
                 confetti({ ...defaults, particleCount: 60, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
                 confetti({ ...defaults, particleCount: 60, origin: { x: randomInRange(0.4, 0.6), y: Math.random() - 0.2 } });
                 confetti({ ...defaults, particleCount: 60, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
-            }, 200); // Shoots 5 times every single second
+            }, 200); 
         }
 
         // === MAIN TIMER LOOP ===
@@ -291,7 +300,7 @@
                 
                 const currentSongTime = preStartSeconds - (distance / 1000);
                 musicPlayer.currentTime = Math.max(0, currentSongTime);
-                musicPlayer.loop = false; // Turn off the loop so it plays normally into the midnight drop and ends eventually
+                musicPlayer.loop = false; 
 
                 musicPlayer.play().then(() => {
                     clickMsgDisplay.style.display = 'none'; 
@@ -322,10 +331,8 @@
 
                 if (!musicStarted) {
                     musicStarted = true;
-                    musicPlayer.currentTime = preStartSeconds;
-                    musicPlayer.play().catch(e => {
-                        document.body.addEventListener('click', () => { musicPlayer.play(); }, { once: true });
-                    });
+                    // Note: If the password screen blocked the initial play, 
+                    // the new checkPassword() logic handles it!
                 }
 
                 startConfettiRain();
