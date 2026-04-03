@@ -22,16 +22,66 @@
             overflow: hidden; 
         }
 
-        /* === NEW NAVIGATION MENU STYLES === */
+        /* === PASSWORD OVERLAY STYLES === */
+        #password-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #050117;
+            z-index: 9999; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+        #password-overlay h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        #password-input {
+            padding: 12px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            border: 2px solid #a064ff;
+            background-color: #ffffff;
+            color: #000000;
+            margin-bottom: 15px;
+            text-align: center;
+            width: 250px;
+        }
+        #password-btn {
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            background-color: #a064ff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: background-color 0.3s;
+        }
+        #password-btn:hover { background-color: #8b4be6; }
+        #password-error {
+            color: #ff4a4a;
+            margin-top: 15px;
+            font-size: 1.1rem;
+            display: none; 
+        }
+        /* =============================== */
+
         #top-nav {
-            position: absolute; /* Pins menu to the top */
+            position: absolute; 
             top: 0;
             left: 0;
             width: 100%;
             padding: 25px 0;
             text-align: center;
-            z-index: 100; /* Keeps menu above everything else */
-            background: linear-gradient(to bottom, rgba(5, 1, 23, 0.9) 0%, rgba(5, 1, 23, 0) 100%); /* Subtle shadow fade */
+            z-index: 100; 
+            background: linear-gradient(to bottom, rgba(5, 1, 23, 0.9) 0%, rgba(5, 1, 23, 0) 100%); 
         }
         .nav-link {
             color: #ffffff;
@@ -44,9 +94,8 @@
             transition: color 0.3s ease;
         }
         .nav-link:hover, .nav-link.active {
-            color: #a064ff; /* Turns purple when hovered or active */
+            color: #a064ff; 
         }
-        /* ================================== */
 
         .content-container {
             max-width: 90%;
@@ -67,7 +116,12 @@
             margin: 20px auto;
             display: block;
             filter: drop-shadow(0 0 20px rgba(160, 100, 255, 0.5));
+            /* NEW: Makes it clickable! */
+            cursor: pointer; 
+            transition: transform 0.2s ease;
         }
+        #disco-ball:active { transform: scale(0.9); } /* Squish effect when clicked */
+
         #countdown-timer {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
             font-variant-numeric: tabular-nums; 
@@ -108,24 +162,30 @@
             #countdown-timer { font-size: 3rem; letter-spacing: 2px; }
             #celebration-msg { font-size: 2rem; }
             #click-msg { font-size: 1rem; }
-            .nav-link { font-size: 0.9rem; margin: 0 10px; } /* Shrinks menu for mobile */
+            .nav-link { font-size: 0.9rem; margin: 0 10px; } 
         }
     </style>
 </head>
 <body>
 
+    <div id="password-overlay">
+        <h2>Enter Password</h2>
+        <input type="password" id="password-input" placeholder="Type password here...">
+        <button id="password-btn">Unlock</button>
+        <div id="password-error">Incorrect password. Try again!</div>
+    </div>
     <header id="top-nav">
         <a href="index.html" class="nav-link active">Home</a> 
         <a href="message.html" class="nav-link">Message</a>
     </header>
+    
     <div class="content-container">
         <img id="main-text-image" src="images/minabday.jpeg" alt="Mina's Birthday Countdown">
-        
         <img id="disco-ball" src="images/discoball.gif" alt="Spinning Disco Ball">
         
         <div id="timer-wrapper">
             <div id="countdown-timer">Loading...</div>
-            <div id="click-msg">(Click anywhere to allow audio)</div>
+            <div id="click-msg">(Audio syncing...)</div>
         </div>
 
         <div id="celebration-wrapper">
@@ -134,20 +194,60 @@
     </div>
 
     <audio id="birthday-song" src="images/countdown.mp3" preload="auto"></audio>
+    
+    <audio id="fart-sound" src="images/fart.mp3" preload="auto"></audio>
 
     <script>
+        // === 1. PASSWORD SETUP ===
+        const correctPassword = "mina20"; 
+        
         const targetDate = new Date('2026-04-04T00:00:00-05:00').getTime();
 
+        // ELEMENT REFERENCES
+        const passwordOverlay = document.getElementById('password-overlay');
+        const passwordInput = document.getElementById('password-input');
+        const passwordBtn = document.getElementById('password-btn');
+        const passwordError = document.getElementById('password-error');
+        
         const timerWrapper = document.getElementById('timer-wrapper');
         const countdownDisplay = document.getElementById('countdown-timer');
         const celebrationWrapper = document.getElementById('celebration-wrapper');
         const clickMsgDisplay = document.getElementById('click-msg');
-        const musicPlayer = document.getElementById('birthday-song');
         const textImage = document.getElementById('main-text-image');
+        const discoBall = document.getElementById('disco-ball');
+        
+        const musicPlayer = document.getElementById('birthday-song');
+        const fartPlayer = document.getElementById('fart-sound');
 
         let musicStarted = false;
         const preStartSeconds = 117; 
 
+        // === PASSWORD LOGIC ===
+        passwordBtn.addEventListener('click', checkPassword);
+        passwordInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') checkPassword(); 
+        });
+
+        function checkPassword() {
+            const guess = passwordInput.value.toLowerCase().trim();
+            if (guess === correctPassword) {
+                passwordOverlay.style.display = 'none';
+                // Entering the password counts as a "click" for browser audio rules!
+                musicPlayer.load(); 
+                fartPlayer.load();
+            } else {
+                passwordError.style.display = 'block';
+                passwordInput.value = ''; 
+            }
+        }
+
+        // === EASTER EGG LOGIC ===
+        discoBall.addEventListener('click', function() {
+            fartPlayer.currentTime = 0; // Rewinds so it works every time she clicks
+            fartPlayer.play();
+        });
+
+        // === CONFETTI ENGINE ===
         function startConfettiRain() {
             const duration = 15 * 1000; 
             const animationEnd = Date.now() + duration;
@@ -165,6 +265,7 @@
             }, 250);
         }
 
+        // === MAIN TIMER LOOP ===
         const countdownInterval = setInterval(function() {
             const now = new Date().getTime();
             const distance = targetDate - now;
@@ -192,6 +293,7 @@
                 musicPlayer.play().then(() => {
                     clickMsgDisplay.style.display = 'none'; 
                 }).catch(error => {
+                    clickMsgDisplay.innerHTML = "(Click anywhere to allow audio)";
                     clickMsgDisplay.style.display = 'block'; 
                     
                     document.body.addEventListener('click', () => {
