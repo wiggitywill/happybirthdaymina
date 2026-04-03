@@ -242,4 +242,93 @@
         // === EASTER EGG LOGIC ===
         // The fart sound plays completely independently of the music track!
         discoBall.addEventListener('click', function() {
-            fartPlayer.currentTime = 0;
+            fartPlayer.currentTime = 0; 
+            fartPlayer.play();
+        });
+
+        // === CONFETTI ENGINE ===
+        function startConfettiRain() {
+            const duration = 15 * 1000; 
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0, colors: ['#a064ff', '#ffffff', '#e6e6e6'] };
+
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+                
+                const particleCount = 120 * (timeLeft / duration);
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.4), y: -0.1 } });
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.6, 0.9), y: -0.1 } });
+            }, 250);
+        }
+
+        // === MAIN TIMER LOOP ===
+        const countdownInterval = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            if (distance > 0) {
+                let timeString = "";
+                if (days > 0) timeString += days + "d ";
+                if (hours > 0 || days > 0) timeString += hours + "h ";
+                if (minutes > 0 || hours > 0 || days > 0) timeString += minutes + "m ";
+                timeString += seconds + "s ";
+                countdownDisplay.innerHTML = timeString;
+            }
+
+            // === UPDATED AUDIO SYNC CHECK ===
+            // When we hit 1m 57s, we secretly snap the music to the exact right timestamp so the climax hits at zero!
+            if (distance <= (preStartSeconds * 1000) && distance > 0 && !musicStarted) {
+                musicStarted = true; 
+                
+                const currentSongTime = preStartSeconds - (distance / 1000);
+                musicPlayer.currentTime = Math.max(0, currentSongTime);
+                musicPlayer.loop = false; // Turn off the loop so it plays normally into the midnight drop
+
+                musicPlayer.play().then(() => {
+                    clickMsgDisplay.style.display = 'none'; 
+                }).catch(error => {
+                    clickMsgDisplay.innerHTML = "(Click anywhere to sync audio)";
+                    clickMsgDisplay.style.display = 'block'; 
+                    
+                    document.body.addEventListener('click', () => {
+                        const newDistance = targetDate - new Date().getTime();
+                        if (newDistance > 0) {
+                            musicPlayer.currentTime = preStartSeconds - (newDistance / 1000);
+                        } else {
+                            musicPlayer.currentTime = preStartSeconds + (Math.abs(newDistance) / 1000);
+                        }
+                        musicPlayer.play();
+                        clickMsgDisplay.style.display = 'none'; 
+                    }, { once: true });
+                });
+            }
+
+            if (distance <= 0) {
+                clearInterval(countdownInterval); 
+
+                timerWrapper.style.display = 'none'; 
+                celebrationWrapper.style.display = 'block'; 
+                textImage.style.filter = "drop-shadow(0 0 40px rgba(160, 100, 255, 0.9))"; 
+
+                if (!musicStarted) {
+                    musicStarted = true;
+                    musicPlayer.currentTime = preStartSeconds;
+                    musicPlayer.play().catch(e => {
+                        document.body.addEventListener('click', () => { musicPlayer.play(); }, { once: true });
+                    });
+                }
+
+                startConfettiRain();
+            }
+        }, 100); 
+    </script>
+</body>
+</html>
