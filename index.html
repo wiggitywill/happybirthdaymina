@@ -230,8 +230,8 @@
             if (guess === correctPassword) {
                 passwordOverlay.style.display = 'none';
                 
-                musicPlayer.loop = true;
-                musicPlayer.play().catch(e => console.log("Waiting for more interaction")); 
+                // We just "load" the audio here to satisfy the browser's rules, but we DON'T play it yet!
+                musicPlayer.load(); 
                 fartPlayer.load();
             } else {
                 passwordError.style.display = 'block';
