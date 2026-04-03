@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>20 Memories</title>
+    
+    <style>
+        body {
+            background-color: #fafafa; 
+            color: #333333; 
+            font-family: 'Garamond', serif; 
+            margin: 0;
+            padding: 120px 20px 50px 20px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* === NAVIGATION MENU === */
+        #top-nav {
+            position: absolute; 
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 25px 0;
+            text-align: center;
+            z-index: 100; 
+            background: linear-gradient(to bottom, rgba(250, 250, 250, 1) 0%, rgba(250, 250, 250, 0) 100%); 
+        }
+        .nav-link {
+            color: #555555; 
+            text-decoration: none;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 1.1rem;
+            margin: 0 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #a064ff; 
+            font-weight: bold;
+        }
+
+        /* === MEMORIES LAYOUT === */
+        .page-title {
+            font-size: 2.8rem;
+            color: #222222;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 1s forwards;
+        }
+
+        .memories-container {
+            max-width: 800px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Space between each memory card */
+        }
+
+        .memory-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 25px 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            opacity: 0;
+            transform: translateY(30px);
+            /* This animation makes them all slide up smoothly */
+            animation: fadeUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        .memory-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(160, 100, 255, 0.15); /* Subtle purple shadow on hover */
+        }
+
+        .memory-number {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 3rem;
+            font-weight: bold;
+            color: #a064ff; /* Signature Purple */
+            min-width: 60px;
+            text-align: right;
+            opacity: 0.8;
+        }
+
+        .memory-text {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            margin: 0;
+            color: #444444;
+        }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Staggered load-in for the first few cards so it looks cool when the page opens */
+        .memory-card:nth-child(1) { animation-delay: 0.2s; }
+        .memory-card:nth-child(2) { animation-delay: 0.4s; }
+        .memory-card:nth-child(3) { animation-delay: 0.6s; }
+        .memory-card:nth-child(4) { animation-delay: 0.8s; }
+        .memory-card:nth-child(n+5) { animation-delay: 1s; } /* The rest load in together */
+
+        @media (max-width: 600px) {
+            .nav-link { font-size: 0.9rem; margin: 0 10px; }
+            .memory-card { flex-direction: column; text-align: center; gap: 10px; padding: 20px; }
+            .memory-number { text-align: center; font-size: 2.5rem; }
+            .page-title { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header id="top-nav">
+        <a href="index.html" class="nav-link">Home</a> 
+        <a href="memories.html" class="nav-link active">Memories</a>
+        <a href="message.html" class="nav-link">Message</a>
+    </header>
+
+    <h1 class="page-title">20 Favorite Memories</h1>
+
+    <div class="memories-container">
+        
+        <div class="memory-card">
+            <span class="memory-number">1</span>
+            <p class="memory-text">Write your first memory here. It can be as long or short as you want!</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">2</span>
+            <p class="memory-text">That time we couldn't stop laughing at...</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">3</span>
+            <p class="memory-text">Write memory 3 here.</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">4</span>
+            <p class="memory-text">Write memory 4 here.</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">5</span>
+            <p class="memory-text">Write memory 5 here.</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">6</span>
+            <p class="memory-text">Write memory 6 here.</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">7</span>
+            <p class="memory-text">Write memory 7 here.</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">8</span>
+            <p class="memory-text">Write memory 8 here.</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">9</span>
+            <p class="memory-text">Write memory 9 here.</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">10</span>
+            <p class="memory-text">Write memory 10 here.</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">11</span>
+            <p class="memory-text">Write memory 11 here.</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">12</span>
+            <p class="memory-text">Write memory 12 here.</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">13</span>
+            <p class="memory-text">Write memory 13 here.</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">14</span>
+            <p class="memory-text">Write memory 14 here.</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">15</span>
+            <p class="memory-text">Write memory 15 here.</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">16</span>
+            <p class="memory-text">Write memory 16 here.</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">17</span>
+            <p class="memory-text">Write memory 17 here.</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">18</span>
+            <p class="memory-text">Write memory 18 here.</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">19</span>
+            <p class="memory-text">Write memory 19 here.</p>
+        </div>
+
+        <div class="memory-card">
+            <span class="memory-number">20</span>
+            <p class="memory-text">Write your final memory here!</p>
+        </div>
+
+    </div>
+
+</body>
+</html>
