@@ -22,7 +22,6 @@
             overflow: hidden; 
         }
 
-        /* === PASSWORD OVERLAY STYLES === */
         #password-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -72,7 +71,6 @@
             display: none; 
         }
 
-        /* === NAVIGATION MENU === */
         #top-nav {
             position: absolute; 
             top: 0;
@@ -199,7 +197,7 @@
 
     <script>
         const correctPassword = "grassjelly"; 
-        const targetDate = new Date('2026-04-03T13:08:00-05:00').getTime();
+        const targetDate = new Date('2026-04-03T13:17:00-05:00').getTime();
 
         const passwordOverlay = document.getElementById('password-overlay');
         const passwordInput = document.getElementById('password-input');
@@ -216,10 +214,12 @@
         const musicPlayer = document.getElementById('birthday-song');
         const fartPlayer = document.getElementById('fart-sound');
 
+        // === NEW STRICT AUDIO LOCKS ===
+        let isUnlocked = false; 
         let musicStarted = false;
         const preStartSeconds = 117; 
 
-        // === UPDATED PASSWORD LOGIC ===
+        // === PASSWORD LOGIC ===
         passwordBtn.addEventListener('click', checkPassword);
         passwordInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') checkPassword(); 
@@ -228,20 +228,39 @@
         function checkPassword() {
             const guess = passwordInput.value.toLowerCase().trim();
             if (guess === correctPassword) {
+                isUnlocked = true; // UNLOCKS THE SITE AUDIO
                 passwordOverlay.style.display = 'none';
                 
-                // === THE FIX ===
-                // Check if the timer is already finished right now
                 const now = new Date().getTime();
                 const distance = targetDate - now;
 
                 if (distance <= 0) {
-                    // The countdown is ALREADY over. Start the party music right now!
+                    // Scenario A: The countdown is ALREADY over. Party right now.
+                    musicStarted = true;
                     musicPlayer.currentTime = preStartSeconds;
-                    musicPlayer.play();
+                    musicPlayer.play().catch(e => {
+                        document.body.addEventListener('click', () => { musicPlayer.play(); }, { once: true });
+                    });
+                    fartPlayer.load();
+                } else if (distance <= (preStartSeconds * 1000)) {
+                    // Scenario B: We are inside the 1m 57s window! Sync perfectly and play!
+                    musicStarted = true;
+                    const currentSongTime = preStartSeconds - (distance / 1000);
+                    musicPlayer.currentTime = Math.max(0, currentSongTime);
+                    musicPlayer.play().catch(e => {
+                        // Fallback in case the browser gets stubborn
+                        clickMsgDisplay.innerHTML = "(Click anywhere to sync audio)";
+                        clickMsgDisplay.style.display = 'block'; 
+                        document.body.addEventListener('click', () => {
+                            const newDist = targetDate - new Date().getTime();
+                            musicPlayer.currentTime = newDist > 0 ? preStartSeconds - (newDist / 1000) : preStartSeconds + (Math.abs(newDist) / 1000);
+                            musicPlayer.play();
+                            clickMsgDisplay.style.display = 'none'; 
+                        }, { once: true });
+                    });
                     fartPlayer.load();
                 } else {
-                    // The countdown is still ticking. Just quiet-load the audio for later.
+                    // Scenario C: The countdown is still safely in the future. Just wait.
                     musicPlayer.load(); 
                     fartPlayer.load();
                 }
@@ -257,7 +276,7 @@
             fartPlayer.play();
         });
 
-        // === UPGRADED CONFETTI ENGINE ===
+        // === CONFETTI ENGINE ===
         function startConfettiRain() {
             const failsafeEnd = Date.now() + (10 * 60 * 1000); 
             const defaults = { startVelocity: 40, spread: 360, ticks: 100, zIndex: 0, colors: ['#a064ff', '#ffffff', '#e6e6e6'] };
@@ -295,7 +314,8 @@
             }
 
             // === AUDIO SYNC CHECK ===
-            if (distance <= (preStartSeconds * 1000) && distance > 0 && !musicStarted) {
+            // Note the NEW `isUnlocked` rule: It will NEVER play behind the password wall
+            if (isUnlocked && distance <= (preStartSeconds * 1000) && distance > 0 && !musicStarted) {
                 musicStarted = true; 
                 
                 const currentSongTime = preStartSeconds - (distance / 1000);
@@ -329,10 +349,14 @@
                 celebrationWrapper.style.display = 'block'; 
                 textImage.style.filter = "drop-shadow(0 0 40px rgba(160, 100, 255, 0.9))"; 
 
-                if (!musicStarted) {
+                // ONLY triggers the music here if she is already inside the website. 
+                // If the screen is still locked, it waits for the checkPassword function!
+                if (isUnlocked && !musicStarted) {
                     musicStarted = true;
-                    // Note: If the password screen blocked the initial play, 
-                    // the new checkPassword() logic handles it!
+                    musicPlayer.currentTime = preStartSeconds;
+                    musicPlayer.play().catch(e => {
+                        document.body.addEventListener('click', () => { musicPlayer.play(); }, { once: true });
+                    });
                 }
 
                 startConfettiRain();
