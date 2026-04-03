@@ -176,6 +176,7 @@
 
     <header id="top-nav">
         <a href="index.html" class="nav-link active">Home</a> 
+        <a href="memories.html" class="nav-link">Memories</a>
         <a href="message.html" class="nav-link">Message</a>
     </header>
     
@@ -197,8 +198,8 @@
     <audio id="fart-sound" src="images/fart.mp3" preload="auto"></audio>
 
     <script>
-        const correctPassword = "mina20"; 
-        const targetDate = new Date('2026-04-02T20:56:00-05:00').getTime();
+        const correctPassword = "grassjelly"; 
+        const targetDate = new Date('2026-04-02T21:04:00-05:00').getTime();
 
         const passwordOverlay = document.getElementById('password-overlay');
         const passwordInput = document.getElementById('password-input');
@@ -218,7 +219,7 @@
         let musicStarted = false;
         const preStartSeconds = 117; 
 
-        // === UPDATED PASSWORD LOGIC ===
+        // === PASSWORD LOGIC ===
         passwordBtn.addEventListener('click', checkPassword);
         passwordInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') checkPassword(); 
@@ -229,7 +230,6 @@
             if (guess === correctPassword) {
                 passwordOverlay.style.display = 'none';
                 
-                // AS SOON as the password is in, start the background music and loop it!
                 musicPlayer.loop = true;
                 musicPlayer.play().catch(e => console.log("Waiting for more interaction")); 
                 fartPlayer.load();
@@ -240,28 +240,30 @@
         }
 
         // === EASTER EGG LOGIC ===
-        // The fart sound plays completely independently of the music track!
         discoBall.addEventListener('click', function() {
             fartPlayer.currentTime = 0; 
             fartPlayer.play();
         });
 
-        // === CONFETTI ENGINE ===
+        // === UPGRADED CONFETTI ENGINE ===
         function startConfettiRain() {
-            const duration = 15 * 1000; 
-            const animationEnd = Date.now() + duration;
-            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0, colors: ['#a064ff', '#ffffff', '#e6e6e6'] };
+            // Failsafe: Stops after 10 minutes just in case the song ends up looping
+            const failsafeEnd = Date.now() + (10 * 60 * 1000); 
+            const defaults = { startVelocity: 40, spread: 360, ticks: 100, zIndex: 0, colors: ['#a064ff', '#ffffff', '#e6e6e6'] };
 
             function randomInRange(min, max) { return Math.random() * (max - min) + min; }
 
             const interval = setInterval(function() {
-                const timeLeft = animationEnd - Date.now();
-                if (timeLeft <= 0) return clearInterval(interval);
+                // STOPS the confetti if the MP3 track finishes playing or if the failsafe triggers
+                if (musicPlayer.ended || Date.now() > failsafeEnd) {
+                    return clearInterval(interval);
+                }
                 
-                const particleCount = 120 * (timeLeft / duration);
-                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.4), y: -0.1 } });
-                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.6, 0.9), y: -0.1 } });
-            }, 250);
+                // MASSIVE CONFETTI STORM: Firing simultaneously from 3 different zones (left, center, right)
+                confetti({ ...defaults, particleCount: 60, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+                confetti({ ...defaults, particleCount: 60, origin: { x: randomInRange(0.4, 0.6), y: Math.random() - 0.2 } });
+                confetti({ ...defaults, particleCount: 60, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+            }, 200); // Shoots 5 times every single second
         }
 
         // === MAIN TIMER LOOP ===
@@ -283,14 +285,13 @@
                 countdownDisplay.innerHTML = timeString;
             }
 
-            // === UPDATED AUDIO SYNC CHECK ===
-            // When we hit 1m 57s, we secretly snap the music to the exact right timestamp so the climax hits at zero!
+            // === AUDIO SYNC CHECK ===
             if (distance <= (preStartSeconds * 1000) && distance > 0 && !musicStarted) {
                 musicStarted = true; 
                 
                 const currentSongTime = preStartSeconds - (distance / 1000);
                 musicPlayer.currentTime = Math.max(0, currentSongTime);
-                musicPlayer.loop = false; // Turn off the loop so it plays normally into the midnight drop
+                musicPlayer.loop = false; // Turn off the loop so it plays normally into the midnight drop and ends eventually
 
                 musicPlayer.play().then(() => {
                     clickMsgDisplay.style.display = 'none'; 
@@ -311,6 +312,7 @@
                 });
             }
 
+            // === ZERO HOUR ===
             if (distance <= 0) {
                 clearInterval(countdownInterval); 
 
